@@ -55,7 +55,11 @@ public class ImageDisplay {
 
     public void showIms(String[] args) {
 
-        // Read args if has more than just the path arg
+        // Read in the specified image
+        imgOne = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        readImageRGB(width, height, args[0], imgOne);
+
+		// Read args & process if has more than just the path arg
         if (args.length > 1) {
 
 			// scale image
@@ -67,10 +71,6 @@ public class ImageDisplay {
             int quantizationMode = Integer.parseInt(args[3]);
             imgOne = quantizeImg(imgOne, quantizationBits, quantizationMode);
         }
-
-        // Read in the specified image
-        imgOne = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        readImageRGB(width, height, args[0], imgOne);
 
         // Use label to display the image
         frame = new JFrame();
