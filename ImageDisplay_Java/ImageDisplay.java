@@ -166,14 +166,18 @@ public class ImageDisplay {
         return quantizedImage;
     }
 
-    private int quantizeChannel(int value, int bitsPerChannel, int mode) {
+    private int quantizeChannel(int value, int bitsPerChannel, int pivot) {
         int maxVal = (1 << bitsPerChannel) - 1;
-        if (mode == -1) {  // Uniform quantization
+
+        if (pivot == -1) {  // Uniform quantization
             int step = 256 / (maxVal + 1);
             return (value / step) * step + step / 2;
-        } else {  // Logarithmic quantization
-            int pivot = mode;
-            int logValue = (int) (Math.log(value + 1) / Math.log(pivot + 1) * maxVal);
+        } else {
+            // double and center at pivot
+            double logMax = Math.log(256) / Math.log(pivot);
+            double normalizedLog = Math.log(value + 1) / Math.log(pivot);
+
+            int logValue = (int) (normalizedLog / logMax * maxVal);
             return Math.min(logValue, maxVal);
         }
     }
