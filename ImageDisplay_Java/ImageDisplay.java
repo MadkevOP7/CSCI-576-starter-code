@@ -173,12 +173,10 @@ public class ImageDisplay {
             int step = 256 / (maxVal + 1);
             return (value / step) * step + step / 2;
         } else {
-            // double and center at pivot
-            double logMax = Math.log(256) / Math.log(pivot);
-            double normalizedLog = Math.log(value + 1) / Math.log(pivot);
-
-            int logValue = (int) (normalizedLog / logMax * maxVal);
-            return Math.min(logValue, maxVal);
+            // center at pivot
+            int logMapped = (int) (255 * Math.log(value + 1) / Math.log(256));
+            int step = 256 / (maxVal + 1);
+            return (logMapped / step) * step + step / 2;
         }
     }
 
