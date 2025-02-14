@@ -2,6 +2,7 @@
 import java.awt.*;
 import java.awt.image.*;
 import java.io.*;
+import java.util.Arrays;
 import javax.swing.*;
 
 public class ImageDisplay {
@@ -53,22 +54,47 @@ public class ImageDisplay {
         }
     }
 
+    private int computeOptimalPivot(BufferedImage img) {
+        int[] histogram = new int[256];
+        for (int y = 0; y < img.getHeight(); y++) {
+            for (int x = 0; x < img.getWidth(); x++) {
+                int color = img.getRGB(x, y);
+                int intensity = (int) (0.299 * ((color >> 16) & 0xFF)
+                        + 0.587 * ((color >> 8) & 0xFF)
+                        + 0.114 * (color & 0xFF));
+                histogram[intensity]++;
+            }
+        }
+
+        int sum = Arrays.stream(histogram).sum();
+        int cumulative = 0, pivot = 0;
+        for (int i = 0; i < histogram.length; i++) {
+            cumulative += histogram[i];
+            if (cumulative >= sum * 0.5) {
+                pivot = i;
+                break;
+            }
+        }
+        return Math.max(pivot, 1);
+    }
+
     public void showIms(String[] args) {
 
         // Read in the specified image
         imgOne = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         readImageRGB(width, height, args[0], imgOne);
 
-		// Read args & process if has more than just the path arg
+        // Read args & process if has more than just the path arg
         if (args.length > 1) {
 
-			// scale image
+            // scale image
             float scale = Float.parseFloat(args[1]);
             imgOne = scaleImg(imgOne, scale);
 
-			// quantize image
-			int quantizationBits = Integer.parseInt(args[2]);
-            int quantizationMode = Integer.parseInt(args[3]);
+            // quantize image
+            int quantizationBits = Integer.parseInt(args[2]);
+            int quantizationMode = (args.length > 3) ? Integer.parseInt(args[3]) : computeOptimalPivot(imgOne);
+            System.out.println("Optimal Pivot: " + quantizationMode);
             imgOne = quantizeImg(imgOne, quantizationBits, quantizationMode);
         }
 
