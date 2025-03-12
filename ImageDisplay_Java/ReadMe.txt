@@ -1,13 +1,11 @@
-This project contains the starter code implemented in Java. This project is cross-platform and can be run on Windows,
-Linux or Mac. You can use any editor or command line tools to work on this project.
+Example images provided are of two kinds.
+1. Single channel images for you to use for debugging etc. 
+   image1.raw -> 352x288 shows a foreman
+   image2.raw -> 352x288 shows a golf playing scene
+   image3.raw -> 352x288 shows a man in swimming pool
+   image4.raw -> 352x288 shows a construction site
 
-This is a  program to read and display an image in JavaFX panels.
+2. The .rgb are the color images with three channels - 352x288 red bytes, followed by 352x288 green, followed by 352x288 blue
 
-To run the code from command line, first compile with:
+You may make use of the same starter code for reading these images.
 
->> javac ImageDisplay.java
-
-and then, you can run it with the path to the RGB file as a parameter
-
->> Usage: java ImageDisplay <path to rgb file>
->> Example: java ImageDisplay ../Lena_512_512.rgb        
