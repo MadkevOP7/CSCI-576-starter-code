@@ -258,10 +258,23 @@ public class ImageDisplay {
     }
 
     /**
-     * The main k-means iteration.
-     * Returns cluster assignments for each block in 'blocks'
+     * Inner class to hold the result of k-means quantization: both cluster assignments and the final codebook.
      */
-    private int[] quantizeVectors(ArrayList<BlockVector> blocks, int dimension, int N, ArrayList<double[]> codebook) {
+    class QuantizationResult {
+        int[] assignments;
+        ArrayList<double[]> codebook;
+
+        QuantizationResult(int[] assignments, ArrayList<double[]> codebook) {
+            this.assignments = assignments;
+            this.codebook = codebook;
+        }
+    }
+
+    /**
+     * The main k-means iteration.
+     * Returns a QuantizationResult holding both the cluster assignments and final codebook.
+     */
+    private QuantizationResult quantizeVectors(ArrayList<BlockVector> blocks, int dimension, int N, ArrayList<double[]> codebook) {
         int numBlocks = blocks.size();
         int[] assignments = new int[numBlocks];
         Arrays.fill(assignments, -1);
@@ -326,6 +339,7 @@ public class ImageDisplay {
                     maxChange = shift;
                 }
             }
+            // update codebook with the new centroids
             codebook = newCw;
 
             if (maxChange <= threshold) {
@@ -335,8 +349,8 @@ public class ImageDisplay {
             iter++;
         }
 
-        // final codebook is now in 'codebook'; assignments are final
-        return assignments;
+        // Return both the final assignments and the final codebook.
+        return new QuantizationResult(assignments, codebook);
     }
 
     /**
@@ -451,7 +465,7 @@ public class ImageDisplay {
         // pad if needed
         BufferedImage paddedImg = padIfNeeded(imgOriginal, blockWidth, blockHeight);
 
-        // extract block vectors from padded
+        // extract block vectors from padded image
         ArrayList<BlockVector> blocks = extractBlocks(paddedImg, M);
 
         // dimension = blockWidth * blockHeight * channels
@@ -460,11 +474,11 @@ public class ImageDisplay {
         // k-means++ init
         ArrayList<double[]> codebook = initCodebook(blocks, dimension, N);
 
-        // main iteration
-        int[] assignments = quantizeVectors(blocks, dimension, N, codebook);
+        // main iteration: now return both assignments and the updated codebook
+        QuantizationResult result = quantizeVectors(blocks, dimension, N, codebook);
 
-        // reconstruct & crop
-        imgDecompressed = reconstruct(blocks, assignments, codebook, M, origWidth, origHeight);
+        // reconstruct & crop using the final codebook and assignments
+        imgDecompressed = reconstruct(blocks, result.assignments, result.codebook, M, origWidth, origHeight);
 
         // Show side-by-side
         frame = new JFrame("Original (left) vs Decompressed (right)");
